@@ -3,46 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Trading Dashboard</title>
+    <title>Trading Balance Portal</title>
     <style>
-        /* Modern Dark Theme Styling */
+        /* General App Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: #0c1017;
-            color: #ffffff;
-            height: 100vh;
-            overflow: hidden;
+            background-color: #f8f9fa;
+            color: #333333;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Login Overlay Gate */
+        /* 1. LOGIN GATE LAYER */
         #login-gate {
-            background-color: #161b22;
-            border: 1px solid #30363d;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
             padding: 40px;
             border-radius: 12px;
             width: 100%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             z-index: 999;
         }
 
         #login-gate h2 {
             margin-bottom: 10px;
-            color: #2f81f7;
+            color: #111111;
         }
 
         #login-gate p {
-            color: #8b949e;
+            color: #666666;
             font-size: 0.9rem;
             margin-bottom: 25px;
         }
@@ -55,17 +54,18 @@
         .input-group label {
             display: block;
             font-size: 0.85rem;
-            color: #8b949e;
+            color: #555555;
             margin-bottom: 5px;
+            font-weight: 500;
         }
 
         .input-group input {
             width: 100%;
             padding: 12px;
-            background-color: #0c1017;
-            border: 1px solid #30363d;
+            background-color: #f1f3f5;
+            border: 1px solid #ced4da;
             border-radius: 6px;
-            color: white;
+            color: #333333;
             font-size: 1rem;
             outline: none;
             text-align: center;
@@ -73,13 +73,13 @@
         }
 
         .input-group input:focus {
-            border-color: #2f81f7;
+            border-color: #00b074;
         }
 
         .login-btn {
             width: 100%;
             padding: 12px;
-            background-color: #238636;
+            background-color: #00b074;
             color: white;
             border: none;
             border-radius: 6px;
@@ -90,128 +90,207 @@
         }
 
         .login-btn:hover {
-            background-color: #2ea043;
+            background-color: #009662;
         }
 
         #error-msg {
-            color: #f85149;
+            color: #df4759;
             font-size: 0.85rem;
             margin-top: 15px;
             display: none;
         }
 
-        /* Trading Dashboard Layout (Hidden by default) */
-        #dashboard {
+        /* 2. DYNAMIC APP CONTAINER (Hidden until Logged In) */
+        #app-container {
             display: none;
             width: 100%;
-            height: 100vh;
-        }
-
-        .sidebar {
-            width: 260px;
-            background-color: #161b22;
-            border-right: 1px solid #30363d;
+            max-width: 1300px;
+            height: 95vh;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
             gap: 20px;
         }
 
-        .logo {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2f81f7;
-            margin-bottom: 10px;
-        }
-
-        /* Wallet Balance Box */
-        .wallet-card {
-            background: linear-gradient(135deg, #1f293d, #161b22);
-            border: 1px solid #30363d;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .wallet-card span {
-            font-size: 0.8rem;
-            color: #8b949e;
-            text-transform: uppercase;
-        }
-
-        .wallet-card .balance {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2df588;
-            margin-top: 5px;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .nav-links a {
-            color: #8b949e;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 6px;
-            display: block;
-        }
-
-        .nav-links a.active {
-            background-color: #21262d;
-            color: #ffffff;
-        }
-
-        .main-content {
+        /* Split Screen: Left Side Layout / Right Side Live Chart */
+        .left-panel {
             flex: 1;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
-        .header {
-            height: 60px;
-            background-color: #161b22;
-            border-bottom: 1px solid #30363d;
+        .right-panel {
+            flex: 1.4;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        /* Replicating the Image Card Designs */
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #eaedf1;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        /* Top Summary Card styling */
+        .summary-box {
+            background-color: #f4f6f9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #77838f;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e2022;
+            margin-top: 8px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e7eaf3;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: #677788;
+        }
+
+        .data-val {
+            font-weight: 600;
+            color: #1e2022;
+        }
+
+        /* Section Headings */
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e2022;
+            margin-bottom: 15px;
+        }
+
+        /* Semi-Circle Progress Gauge Design */
+        .gauge-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 10px;
+        }
+
+        .gauge {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        .gauge-body {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #e4e8ed;
+            border-radius: 100px 100px 0 0;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #00b074;
+            transform-origin: center top;
+            transform: rotate(0.5turn);
+            border-radius: 100px 100px 0 0;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .gauge-cover {
+            position: absolute;
+            top: 15%;
+            left: 7.5%;
+            width: 85%;
+            height: 85%;
+            background: #ffffff;
+            border-radius: 100px 100px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 5px;
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 220px;
+            font-size: 0.8rem;
+            color: #677788;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Color classes for wins and losses */
+        .val-green { color: #00b074 !important; }
+        .val-red { color: #df4759 !important; }
+
+        /* Navigation header bar right above chart */
+        .chart-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            background: #ffffff;
         }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .chart-title {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
-        .avatar {
-            width: 32px;
-            height: 32px;
-            background-color: #2f81f7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+        .user-tag {
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: #f1f3f5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #495057;
         }
 
-        .chart-container {
+        .chart-frame {
             flex: 1;
-            padding: 20px;
-            position: relative;
-        }
-
-        /* TradingView Widget Container Styles */
-        .tradingview-widget-container {
             width: 100%;
             height: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #30363d;
         }
     </style>
 </head>
@@ -219,115 +298,58 @@
 
     <!-- 1. LOGIN GATE LAYER -->
     <div id="login-gate">
-        <h2>Apex Portal</h2>
-        <p>Enter your secure account code to view dashboard</p>
+        <h2>Trading Portal</h2>
+        <p>Enter your unique code to inspect account summary</p>
         
         <div class="input-group">
-            <label for="account-code">Secure Account Code</label>
+            <label for="account-code">Secure Access Code</label>
             <input type="text" id="account-code" placeholder="XXXXXX" autocomplete="off">
         </div>
         
-        <button class="login-btn" onclick="checkAccessCode()">Access Dashboard</button>
-        <div id="error-msg">Invalid access code. Please try again.</div>
+        <button class="login-btn" onclick="processLogin()">Access Profile</button>
+        <div id="error-msg">Incorrect token key. Try again.</div>
     </div>
 
-    <!-- 2. MAIN TRADING DASHBOARD -->
-    <div id="dashboard">
-        <!-- Left Navigation & Balance Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">📈 ApexTrade</div>
+    <!-- 2. MAIN APPLICATION PLATFORM -->
+    <div id="app-container">
+        
+        <!-- Left Side: Financial Balance Breakdowns -->
+        <div class="left-panel">
             
-            <!-- Dynamic Wallet Box -->
-            <div class="wallet-card">
-                <span>Total Balance</span>
-                <div class="balance" id="display-balance">$0.00</div>
+            <!-- Card 1: Main Balance Sheet Header -->
+            <div class="card">
+                <div class="summary-box">
+                    <div class="summary-label">Trading Balance</div>
+                    <div class="summary-value" id="box-trading-balance">$0.00</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Available Cash ⓘ</div>
+                    <div class="data-val" id="row-available-cash">$0.00</div>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Margin from Pledged Holdings ⓘ</div>
+                    <div class="data-val">$0.00</div>
+                </div>
             </div>
 
-            <ul class="nav-links">
-                <li><a href="#" class="active">Dashboard</a></li>
-                <li><a href="#">Markets</a></li>
-                <li><a href="#">Wallet History</a></li>
-            </ul>
-        </aside>
-
-        <!-- Main Workspace -->
-        <main class="main-content">
-            <header class="header">
-                <div class="market-status">Market Status: <span style="color: #238636;">● Live</span></div>
-                <div class="user-profile">
-                    <span id="display-username">Trader</span>
-                    <div class="avatar">U</div>
+            <!-- Card 2: Visual Progress Utilization Arc Gauge -->
+            <div class="card">
+                <div class="section-title">Amount Utilised Today</div>
+                <div class="gauge-wrapper">
+                    <div class="gauge">
+                        <div class="gauge-body"></div>
+                        <div class="gauge-fill" id="gauge-sector"></div>
+                        <div class="gauge-cover">
+                            <span style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Amount Utilised</span>
+                            <span style="font-size: 1.3rem; font-weight: 700; color: #222;" id="gauge-center-val">$0.0</span>
+                        </div>
+                    </div>
+                    <div class="gauge-labels">
+                        <span>0.0</span>
+                        <span id="gauge-max-label">$18.38K</span>
+                    </div>
                 </div>
-            </header>
+            </div>
 
-            <!-- Fixed Real-Time Moving Chart Container -->
-            <section class="chart-container">
-                <div class="tradingview-widget-container">
-                    <div id="tradingview_chart_element" style="width: 100%; height: 100%;"></div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script type="text/javascript">
-        // DATABASE OVERLAY
-        const accountDatabase = {
-            "VIP777": { name: "Trader Alice", balance: "$12,450.80" },
-            "GOLD99": { name: "Trader Bob", balance: "$850.25" },
-            "ALPHA1": { name: "Trader Charlie", balance: "$145,000.00" }
-        };
-
-        function checkAccessCode() {
-            const enteredCode = document.getElementById("account-code").value.trim();
-            const errorElement = document.getElementById("error-msg");
-            
-            if (accountDatabase[enteredCode]) {
-                const userSession = accountDatabase[enteredCode];
-                
-                // Hide Gate, Show Dashboard
-                document.getElementById("login-gate").style.display = "none";
-                document.getElementById("dashboard").style.display = "flex";
-                document.body.style.display = "block"; 
-                
-                // Inject Specific User Data
-                document.getElementById("display-username").innerText = userSession.name;
-                document.getElementById("display-balance").innerText = userSession.balance;
-                
-                // Inject the working interactive widget script directly
-                loadLiveTradingViewChart();
-            } else {
-                errorElement.style.display = "block";
-            }
-        }
-
-        // Fresh dynamic loader that perfectly fires up the dynamic candle chart 
-        function loadLiveTradingViewChart() {
-            const container = document.getElementById("tradingview_chart_element");
-            container.innerHTML = ""; // Clear loader placeholder
-            
-            const script = document.createElement("script");
-            script.type = "text/javascript";
-            script.src = "https://tradingview.com";
-            script.async = true;
-            
-            // Configuration for the moving red/green candle chart
-            script.text = JSON.stringify({
-                "width": "100%",
-                "height": "100%",
-                "symbol": "NASDAQ:TSLA",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "allow_symbol_change": true,
-                "calendar": false,
-                "hide_volume": false,
-                "support_host": "https://www.tradingview.com"
-            });
-            
-            container.appendChild(script);
-        }
-    </script>
-</body>
-</html>
+            <!-- Card 3: Detailed Profit/Loss & Investment Breakdown -->
+            <div class="card">
