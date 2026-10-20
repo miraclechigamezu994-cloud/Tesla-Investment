@@ -202,9 +202,11 @@
         .chart-container {
             flex: 1;
             padding: 20px;
+            position: relative;
         }
 
-        #tradingview_widget {
+        /* TradingView Widget Container Styles */
+        .tradingview-widget-container {
             width: 100%;
             height: 100%;
             border-radius: 8px;
@@ -229,7 +231,7 @@
         <div id="error-msg">Invalid access code. Please try again.</div>
     </div>
 
-    <!-- 2. MAIN TRADING DASHBOARD (Revealed on correct code) -->
+    <!-- 2. MAIN TRADING DASHBOARD -->
     <div id="dashboard">
         <!-- Left Navigation & Balance Sidebar -->
         <aside class="sidebar">
@@ -258,18 +260,17 @@
                 </div>
             </header>
 
-            <!-- Chart Component -->
+            <!-- Fixed Real-Time Moving Chart Container -->
             <section class="chart-container">
-                <div id="tradingview_widget"></div>
+                <div class="tradingview-widget-container">
+                    <div id="tradingview_chart_element" style="width: 100%; height: 100%;"></div>
+                </div>
             </section>
         </main>
     </div>
 
-    <!-- TradingView Engine JavaScript -->
-    <script type="text/javascript" src="https://tradingview.com"></script>
-    
     <script type="text/javascript">
-        // DATABASE OVERLAY (Add, remove, or change codes and balances here)
+        // DATABASE OVERLAY
         const accountDatabase = {
             "VIP777": { name: "Trader Alice", balance: "$12,450.80" },
             "GOLD99": { name: "Trader Bob", balance: "$850.25" },
@@ -280,38 +281,52 @@
             const enteredCode = document.getElementById("account-code").value.trim();
             const errorElement = document.getElementById("error-msg");
             
-            // Check if code exists in our database object
             if (accountDatabase[enteredCode]) {
                 const userSession = accountDatabase[enteredCode];
                 
-                // 1. Hide Login Gate, Show Dashboard
+                // Hide Gate, Show Dashboard
                 document.getElementById("login-gate").style.display = "none";
                 document.getElementById("dashboard").style.display = "flex";
-                document.body.style.display = "block"; // Reset body flex alignment
+                document.body.style.display = "block"; 
                 
-                // 2. Inject specific user data into elements
+                // Inject Specific User Data
                 document.getElementById("display-username").innerText = userSession.name;
                 document.getElementById("display-balance").innerText = userSession.balance;
                 
-                // 3. Load the live chart engine
-                initiateChart();
+                // Inject the working interactive widget script directly
+                loadLiveTradingViewChart();
             } else {
-                // Show error message if code doesn't match
                 errorElement.style.display = "block";
             }
         }
 
-        function initiateChart() {
-            new TradingView.widget({
+        // Fresh dynamic loader that perfectly fires up the dynamic candle chart 
+        function loadLiveTradingViewChart() {
+            const container = document.getElementById("tradingview_chart_element");
+            container.innerHTML = ""; // Clear loader placeholder
+            
+            const script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = "https://tradingview.com";
+            script.async = true;
+            
+            // Configuration for the moving red/green candle chart
+            script.text = JSON.stringify({
                 "width": "100%",
                 "height": "100%",
                 "symbol": "NASDAQ:TSLA",
                 "interval": "D",
+                "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "1",
                 "locale": "en",
-                "container_id": "tradingview_widget"
+                "allow_symbol_change": true,
+                "calendar": false,
+                "hide_volume": false,
+                "support_host": "https://www.tradingview.com"
             });
+            
+            container.appendChild(script);
         }
     </script>
 </body>
