@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Trading Dashboard</title>
+    <style>
+        /* Modern Dark Theme Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0c1017;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Nav */
+        .sidebar {
+            width: 240px;
+            background-color: #161b22;
+            border-right: 1px solid #30363d;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2f81f7;
+            margin-bottom: 20px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            display: block;
+            transition: 0.2s;
+        }
+
+        .nav-links a.active, .nav-links a:hover {
+            background-color: #21262d;
+            color: #ffffff;
+        }
+
+        /* Main Workspace Layout */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header Bar */
+        .header {
+            height: 60px;
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #2f81f7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* Live Trading Chart Area */
+        .chart-container {
+            flex: 1;
+            padding: 20px;
+            background-color: #0c1017;
+        }
+
+        #tradingview_widget {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">📈 ApexTrade</div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Dashboard</a></li>
+            <li><a href="#">Markets</a></li>
+            <li><a href="#">Wallet</a></li>
+            <li><a href="#">Settings</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Section -->
+    <main class="main-content">
+        <!-- Top Navigation Status -->
+        <header class="header">
+            <div class="market-status">Market Status: <span style="color: #238636;">● Open</span></div>
+            <div class="user-profile">
+                <span>Trader #4042</span>
+                <div class="avatar">T</div>
+            </div>
+        </header>
+
+        <!-- Dynamic Live Chart -->
+        <section class="chart-container">
+            <div id="tradingview_widget"></div>
+        </section>
+    </main>
+
+    <!-- Embedded Real-Time TradingView Script -->
+    <script type="text/javascript" src="https://tradingview.com"></script>
+    <script type="text/javascript">
+        new TradingView.widget({
+            "width": "100%",
+            "height": "100%",
+            "symbol": "NASDAQ:TSLA",
+            "interval": "D",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#161b22",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_widget"
+        });
+    </script>
+</body>
+</html>
