@@ -9,21 +9,106 @@
         * {
             margin: 0;
             padding: 0;
-            box-box-sizing: border-box;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
             background-color: #0c1017;
             color: #ffffff;
-            display: flex;
             height: 100vh;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Sidebar Nav */
+        /* Login Overlay Gate */
+        #login-gate {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        #login-gate h2 {
+            margin-bottom: 10px;
+            color: #2f81f7;
+        }
+
+        #login-gate p {
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: #0c1017;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .input-group input:focus {
+            border-color: #2f81f7;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: #2ea043;
+        }
+
+        #error-msg {
+            color: #f85149;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* Trading Dashboard Layout (Hidden by default) */
+        #dashboard {
+            display: none;
+            width: 100%;
+            height: 100vh;
+        }
+
         .sidebar {
-            width: 240px;
+            width: 260px;
             background-color: #161b22;
             border-right: 1px solid #30363d;
             padding: 20px;
@@ -36,7 +121,29 @@
             font-size: 1.2rem;
             font-weight: bold;
             color: #2f81f7;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Wallet Balance Box */
+        .wallet-card {
+            background: linear-gradient(135deg, #1f293d, #161b22);
+            border: 1px solid #30363d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .wallet-card span {
+            font-size: 0.8rem;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+
+        .wallet-card .balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2df588;
+            margin-top: 5px;
         }
 
         .nav-links {
@@ -52,22 +159,19 @@
             padding: 10px;
             border-radius: 6px;
             display: block;
-            transition: 0.2s;
         }
 
-        .nav-links a.active, .nav-links a:hover {
+        .nav-links a.active {
             background-color: #21262d;
             color: #ffffff;
         }
 
-        /* Main Workspace Layout */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
 
-        /* Top Header Bar */
         .header {
             height: 60px;
             background-color: #161b22;
@@ -93,14 +197,11 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.85rem;
         }
 
-        /* Live Trading Chart Area */
         .chart-container {
             flex: 1;
             padding: 20px;
-            background-color: #0c1017;
         }
 
         #tradingview_widget {
@@ -114,52 +215,104 @@
 </head>
 <body>
 
-    <!-- Left Navigation Sidebar -->
-    <aside class="sidebar">
-        <div class="logo">📈 ApexTrade</div>
-        <ul class="nav-links">
-            <li><a href="#" class="active">Dashboard</a></li>
-            <li><a href="#">Markets</a></li>
-            <li><a href="#">Wallet</a></li>
-            <li><a href="#">Settings</a></li>
-        </ul>
-    </aside>
+    <!-- 1. LOGIN GATE LAYER -->
+    <div id="login-gate">
+        <h2>Apex Portal</h2>
+        <p>Enter your secure account code to view dashboard</p>
+        
+        <div class="input-group">
+            <label for="account-code">Secure Account Code</label>
+            <input type="text" id="account-code" placeholder="XXXXXX" autocomplete="off">
+        </div>
+        
+        <button class="login-btn" onclick="checkAccessCode()">Access Dashboard</button>
+        <div id="error-msg">Invalid access code. Please try again.</div>
+    </div>
 
-    <!-- Main Section -->
-    <main class="main-content">
-        <!-- Top Navigation Status -->
-        <header class="header">
-            <div class="market-status">Market Status: <span style="color: #238636;">● Open</span></div>
-            <div class="user-profile">
-                <span>Trader #4042</span>
-                <div class="avatar">T</div>
+    <!-- 2. MAIN TRADING DASHBOARD (Revealed on correct code) -->
+    <div id="dashboard">
+        <!-- Left Navigation & Balance Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">📈 ApexTrade</div>
+            
+            <!-- Dynamic Wallet Box -->
+            <div class="wallet-card">
+                <span>Total Balance</span>
+                <div class="balance" id="display-balance">$0.00</div>
             </div>
-        </header>
 
-        <!-- Dynamic Live Chart -->
-        <section class="chart-container">
-            <div id="tradingview_widget"></div>
-        </section>
-    </main>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#">Markets</a></li>
+                <li><a href="#">Wallet History</a></li>
+            </ul>
+        </aside>
 
-    <!-- Embedded Real-Time TradingView Script -->
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="header">
+                <div class="market-status">Market Status: <span style="color: #238636;">● Live</span></div>
+                <div class="user-profile">
+                    <span id="display-username">Trader</span>
+                    <div class="avatar">U</div>
+                </div>
+            </header>
+
+            <!-- Chart Component -->
+            <section class="chart-container">
+                <div id="tradingview_widget"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- TradingView Engine JavaScript -->
     <script type="text/javascript" src="https://tradingview.com"></script>
+    
     <script type="text/javascript">
-        new TradingView.widget({
-            "width": "100%",
-            "height": "100%",
-            "symbol": "NASDAQ:TSLA",
-            "interval": "D",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": "en",
-            "toolbar_bg": "#161b22",
-            "enable_publishing": false,
-            "hide_side_toolbar": false,
-            "allow_symbol_change": true,
-            "container_id": "tradingview_widget"
-        });
+        // DATABASE OVERLAY (Add, remove, or change codes and balances here)
+        const accountDatabase = {
+            "VIP777": { name: "Trader Alice", balance: "$12,450.80" },
+            "GOLD99": { name: "Trader Bob", balance: "$850.25" },
+            "ALPHA1": { name: "Trader Charlie", balance: "$145,000.00" }
+        };
+
+        function checkAccessCode() {
+            const enteredCode = document.getElementById("account-code").value.trim();
+            const errorElement = document.getElementById("error-msg");
+            
+            // Check if code exists in our database object
+            if (accountDatabase[enteredCode]) {
+                const userSession = accountDatabase[enteredCode];
+                
+                // 1. Hide Login Gate, Show Dashboard
+                document.getElementById("login-gate").style.display = "none";
+                document.getElementById("dashboard").style.display = "flex";
+                document.body.style.display = "block"; // Reset body flex alignment
+                
+                // 2. Inject specific user data into elements
+                document.getElementById("display-username").innerText = userSession.name;
+                document.getElementById("display-balance").innerText = userSession.balance;
+                
+                // 3. Load the live chart engine
+                initiateChart();
+            } else {
+                // Show error message if code doesn't match
+                errorElement.style.display = "block";
+            }
+        }
+
+        function initiateChart() {
+            new TradingView.widget({
+                "width": "100%",
+                "height": "100%",
+                "symbol": "NASDAQ:TSLA",
+                "interval": "D",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "container_id": "tradingview_widget"
+            });
+        }
     </script>
 </body>
 </html>
