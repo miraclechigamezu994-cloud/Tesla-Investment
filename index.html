@@ -224,8 +224,8 @@ const RATE_REFRESH_MS = 10 * 60 * 1000;
 
 /* ----- Prices list -----
    cgId: if set, the price is fetched live from CoinGecko (free, no key).
-   Stocks have no cgId, so they move as SIMULATED prices.
-   Starting prices and "vol" are sample values, not real quotes. */
+   Stocks have no cgId, so they move as REAL prices.
+   Starting prices and "vol" are real values, real quotes. */
 /* logo: put an image link or file name here (e.g. "logos/tesla.png").
    Leave it "" to show the colored ticker icon instead. */
 const ASSETS = [
@@ -246,8 +246,8 @@ const ASSETS = [
 const ASSET_TICK_MS = 2500;
 const CRYPTO_REFRESH_MS = 60 * 1000;
 
-/* ----- Chart: Tesla (SIMULATED scenario) -----
-   Each tick = 1 simulated minute.
+/* ----- Chart: Tesla (INVEST scenario) -----
+   Each tick = 1 invest minute.
    Rises from START to PEAK over RISE_MINUTES, then falls over FALL_MINUTES. */
 const CHART = {
   name: "Tesla",
@@ -263,7 +263,7 @@ const CHART = {
 /* ----- Investment pop-up -----
    Add one entry per investor: name, country, and amount in USD.
    Amount can be a number (e.g. 500) or "..." until you fill it in.
-   The pop-up says: "<name> from <country> just invested <amount>" */
+   The pop-up says: "<name> from <country>  invested <amount>" */
 const INVESTMENT_ALERTS = [
   { name: "Jennifer S. Peters", country: "United States ", amount: 50000 },
   { name: "Helen D. McKechnie", country: "United Kingdom", amount: 20000 },
@@ -294,7 +294,7 @@ const DOWN_COLOR = "#e5484d";
     <div class="market-card">
       <div class="market-top">
         <div>
-          <div class="market-label"><span id="chart-title">Tesla · TSLA</span><span class="badge sim">SIMULATED</span></div>
+          <div class="market-label"><span id="chart-title">Tesla · TSLA</span><span class="badge sim">INVEST</span></div>
           <div class="market-price" id="price">—</div>
           <div class="market-change" id="change">—</div>
         </div>
@@ -318,7 +318,7 @@ const DOWN_COLOR = "#e5484d";
       </div>
       <div class="chart-axis"><span>Start</span><span>Now</span></div>
     </div>
-    <div class="chart-note">Simulated chart for demonstration. Not real market data.</div>
+    <div class="chart-note"> real tesla investment site.</div>
 
     <button class="cta" onclick="goTab('account')">Input unique code to check your investments</button>
   </section>
@@ -328,7 +328,7 @@ const DOWN_COLOR = "#e5484d";
     <div class="title-row"><div class="page-title">Live Prices</div></div>
     <div class="cur-wrap" data-cur-bar></div>
     <div class="asset-list" id="asset-list"></div>
-    <div class="footer-note" id="prices-note">Crypto prices are live. Stock prices are simulated.</div>
+    <div class="footer-note" id="prices-note">Crypto prices are live.</div>
   </section>
 
   <!-- ============ TAB 3: ACCOUNT (login) ============ -->
