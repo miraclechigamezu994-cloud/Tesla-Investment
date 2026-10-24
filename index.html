@@ -231,8 +231,8 @@ const ASSETS = [
 const ASSET_TICK_MS = 2500;
 const CRYPTO_REFRESH_MS = 60 * 1000;
 
-/* ----- Chart: Tesla (SIMULATED scenario) -----
-   Each tick = 1 simulated minute.
+/* ----- Chart: Tesla (INVEST) -----
+   Each tick = 1 invest minute.
    Rises from START to PEAK over RISE_MINUTES, then falls over FALL_MINUTES. */
 const CHART = {
   name: "Tesla",
@@ -260,7 +260,7 @@ const DOWN_COLOR = "#e5484d";
     <div class="market-card">
       <div class="market-top">
         <div>
-          <div class="market-label"><span id="chart-title">Tesla · TSLA</span><span class="badge sim">SIMULATED</span></div>
+          <div class="market-label"><span id="chart-title">Tesla · TSLA</span><span class="badge sim">INVEST</span></div>
           <div class="market-price" id="price">—</div>
           <div class="market-change" id="change">—</div>
         </div>
@@ -284,7 +284,7 @@ const DOWN_COLOR = "#e5484d";
       </div>
       <div class="chart-axis"><span>Start</span><span>Now</span></div>
     </div>
-    <div class="chart-note">Simulated chart for demonstration. Not real market data.</div>
+    <div class="chart-note">your Tesla investment.</div>
 
     <button class="cta" onclick="goTab('account')">Input unique code to check your investments</button>
   </section>
