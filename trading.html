@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4f6fa">
+<title>Trading Portal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* App-like: no selection, copy, long-press menu, zoom */
+  html, body {
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; overscroll-behavior: none;
+  }
+  input { -webkit-user-select: text; user-select: text; }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+
+  :root {
+    --green: #00b074;
+    --green-dark: #009662;
+    --red: #e5484d;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --ink: #1b1f27;
+    --muted: #7a8594;
+    --line: #e9edf3;
+    --radius: 16px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh; min-height: 100dvh;
+  }
+
+  .app { max-width: 420px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; position: relative; padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+
+  .screen { display: none; padding: calc(14px + env(safe-area-inset-top)) 16px 16px; animation: fadeUp .35s ease; }
+  .screen.active { display: block; }
+  .screen.center { min-height: calc(100dvh - 92px); display: none; }
+  .screen.center.active { display: flex; align-items: center; justify-content: center; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .title-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 4px 14px; gap: 10px; }
+  .page-title { font-size: 1.35rem; font-weight: 700; }
+  .back-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--ink); line-height: 1; }
+
+  /* ---------- CURRENCY SWITCH ---------- */
+  .cur-wrap { margin-bottom: 14px; }
+  .cur-bar { display: inline-flex; background: #e9edf3; border-radius: 12px; padding: 4px; gap: 4px; }
+  .cur-btn { border: none; background: transparent; color: var(--muted); font-size: 0.8rem; font-weight: 700; padding: 7px 11px; border-radius: 9px; cursor: pointer; transition: all .2s; }
+  .cur-btn.active { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(20,30,50,.12); }
+  .rate-note { font-size: 0.7rem; color: var(--muted); margin-top: 8px; }
+  .rate-note .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: middle; }
+  .rate-note .off-dot { background: #f0a500; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 0.6rem; font-weight: 800; padding: 3px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle; letter-spacing: .5px; }
+  .badge.live { background: #e8f8f2; color: var(--green); }
+  .badge.sim { background: #eef1f5; color: var(--muted); }
+
+  /* ---------- MARKET (chart) ---------- */
+  .market-card { background: var(--card); border-radius: var(--radius); padding: 18px 16px 12px; box-shadow: 0 6px 24px rgba(20,30,50,0.06); border: 1px solid var(--line); }
+  .market-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .market-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .market-price { font-size: 2rem; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; transition: color .3s; }
+  .market-change { font-size: 0.9rem; font-weight: 700; margin-top: 2px; transition: color .3s; }
+  .live-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 700; color: var(--muted); background: #f1f4f8; padding: 5px 10px; border-radius: 20px; }
+  .live-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,176,116,.5); } 70% { box-shadow: 0 0 0 7px rgba(0,176,116,0); } 100% { box-shadow: 0 0 0 0 rgba(0,176,116,0); } }
+
+  .chart-box { position: relative; height: 290px; margin-top: 10px; }
+  .chart-box svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .float-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); background: #fff; border: 3px solid var(--c, var(--green)); box-shadow: 0 0 0 6px var(--c-soft, rgba(0,176,116,.15)); transition: left .9s ease, top .9s ease, border-color .3s; }
+  .float-tag { position: absolute; transform: translate(-50%, -150%); background: var(--c, var(--green)); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 5px 9px; border-radius: 8px; white-space: nowrap; transition: left .9s ease, top .9s ease, background .3s; font-variant-numeric: tabular-nums; }
+  .float-tag::after { content: ""; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--c, var(--green)); border-bottom: 0; }
+  .chart-axis { display: flex; justify-content: space-between; font-size: 0.7rem; color: #a0a9b6; margin-top: 6px; }
+  .chart-note { font-size: 0.7rem; color: #a0a9b6; text-align: center; margin-top: 10px; }
+
+  .cta { width: 100%; margin-top: 14px; padding: 16px; border: none; border-radius: 14px; cursor: pointer; background: linear-gradient(135deg, var(--green), var(--green-dark)); color: #fff; font-size: 0.98rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,176,116,.25); }
+  .cta:active { transform: scale(.985); }
+
+  /* ---------- PRICES LIST ---------- */
+  .asset-list { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .asset-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .asset-row:last-child { border-bottom: none; }
+  .asset-row.flash-up { animation: flashUp .7s ease; }
+  .asset-row.flash-down { animation: flashDown .7s ease; }
+  @keyframes flashUp { from { background: rgba(0,176,116,.16); } to { background: transparent; } }
+  @keyframes flashDown { from { background: rgba(229,72,77,.16); } to { background: transparent; } }
+  .asset-ic { width: 40px; height: 40px; border-radius: 50%; background: #f4f6fa; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; font-weight: 800; color: #3a4452; }
+  .asset-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: contain; background: #f4f6fa; flex-shrink: 0; }
+  .asset-name { flex: 1; min-width: 0; }
+  .asset-name b { display: block; font-size: 0.92rem; }
+  .asset-name small { color: var(--muted); font-size: 0.72rem; }
+  .asset-price { text-align: right; }
+  .asset-price .p { font-weight: 800; font-size: 0.96rem; font-variant-numeric: tabular-nums; }
+  .asset-price .c { font-size: 0.75rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .footer-note { font-size: 0.72rem; color: #a0a9b6; text-align: center; margin-top: 12px; }
+
+  /* ---------- LOGIN ---------- */
+  .login-card { background: var(--card); width: 100%; max-width: 380px; padding: 30px 22px; border-radius: 20px; border: 1px solid var(--line); text-align: center; box-shadow: 0 10px 30px rgba(20,30,50,0.07); }
+  .login-icon { width: 58px; height: 58px; border-radius: 18px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: #e8f8f2; }
+  .login-card h2 { font-size: 1.15rem; margin-bottom: 6px; }
+  .login-card p { font-size: 0.86rem; color: var(--muted); margin-bottom: 20px; }
+  .login-card label { display: block; text-align: left; font-size: 0.8rem; color: #55606e; margin-bottom: 6px; font-weight: 600; }
+  .login-card input { width: 100%; padding: 14px; font-size: 1.05rem; text-align: center; letter-spacing: 4px; font-weight: 600; background: #f4f6fa; border: 1.5px solid #dfe4ec; border-radius: 12px; outline: none; text-transform: uppercase; color: var(--ink); }
+  .login-card input:focus { border-color: var(--green); background: #fff; }
+  .login-card .cta { margin-top: 16px; }
+  #error-msg { color: var(--red); font-size: 0.85rem; margin-top: 14px; display: none; }
+
+  /* ---------- DASHBOARD ---------- */
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: 0 4px 16px rgba(20,30,50,0.04); }
+  .balance-box { background: linear-gradient(135deg, #eefaf5, #f4f6fa); border-radius: 14px; padding: 22px 16px; text-align: center; margin-bottom: 14px; }
+  .label-caps { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+  .big-value { font-size: 2rem; font-weight: 800; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; color: var(--muted); padding: 7px 0; }
+  .info-row .val { color: var(--ink); font-weight: 700; }
+  .section-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; }
+  .gauge-wrap { position: relative; width: 100%; max-width: 280px; margin: 0 auto; }
+  .gauge-wrap svg { width: 100%; height: auto; display: block; }
+  .gauge-center { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; }
+  .gauge-center .small { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: .5px; }
+  .gauge-center .num { font-size: 1.3rem; font-weight: 800; margin-top: 2px; }
+  .gauge-scale { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  .breakup-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+  .breakup-row:last-child { border-bottom: none; }
+  .breakup-row .amt { font-weight: 700; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: #f4f6fa; border-radius: 12px; padding: 14px 12px; }
+  .stat .label { font-size: 0.74rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .stat .value { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .green { color: var(--green) !important; }
+  .red { color: var(--red) !important; }
+
+  /* ---------- ABOUT ---------- */
+  .about-card { text-align: center; padding: 28px 20px; }
+  .about-card .logo { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 14px; background: linear-gradient(135deg, var(--green), var(--green-dark)); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; }
+  .about-card h3 { font-size: 1.15rem; margin-bottom: 6px; }
+  .about-card p { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+  .list-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+  .list-item:last-child { border-bottom: none; }
+  .list-item span.ic { font-size: 1.2rem; }
+  .list-item small { display: block; color: var(--muted); margin-top: 2px; }
+
+  /* ---------- INVESTMENT POP-UP ---------- */
+  .toast {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 50%;
+    transform: translate(-50%, -160%); opacity: 0; pointer-events: none;
+    background: #1b1f27; color: #fff; padding: 12px 16px; border-radius: 14px;
+    font-size: 0.86rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    display: flex; align-items: center; gap: 10px; width: max-content; max-width: 90%;
+    transition: transform .4s ease, opacity .4s ease; z-index: 100;
+  }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .toast .t-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+  /* ---------- BOTTOM MENU (4 tabs) ---------- */
+  .tabbar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 420px; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,255,255,.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 8px 8px calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 20px rgba(20,30,50,0.05); z-index: 50; }
+  .tab { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #9aa4b2; font-size: 0.7rem; font-weight: 600; padding: 6px 0; border-radius: 12px; transition: color .2s, background .2s; }
+  .tab .ti { font-size: 1.25rem; line-height: 1; transition: transform .2s; }
+  .tab.active { color: var(--green); background: #eefaf5; }
+  .tab.active .ti { transform: translateY(-2px) scale(1.08); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     EDIT YOUR SETTINGS HERE
+     ============================================================ -->
+<script>
+/* ----- Customer accounts (amounts in USD) ----- */
+const USERS = {
+  "A7K2M9": {
+    name: "User One",
+    availableCash: 220.00,
+    margin: 0,
+    amountAdded: 220.00,
+    amountUtilised: 0,
+    todayTopUp: 0,
+    investmentBalance: 0,
+    gain: 0,
+    loss: 0
+  },
+  "B3X8Q1": {
+    name: "User Two",
+    availableCash: 62.50,
+    margin: 18.00,
+    amountAdded: 300.00,
+    amountUtilised: 37.21,
+    todayTopUp: 24.00,
+    investmentBalance: 300.00,
+    gain: 5.05,
+    loss: 0
+  },
+  "C5N4T6": {
+    name: "User Three",
+    availableCash: 117.00,
+    margin: 0,
+    amountAdded: 144.00,
+    amountUtilised: 27.00,
+    todayTopUp: 0,
+    investmentBalance: 144.00,
+    gain: 0,
+    loss: 4.56
+  }
+};
+
+/* ----- Currency ----- */
+const CURRENCIES = [
+  { code: "USD", locale: "en-US" },
+  { code: "INR", locale: "en-IN" },
+  { code: "EUR", locale: "de-DE" },
+  { code: "GBP", locale: "en-GB" }
+];
+const FALLBACK_RATES = { USD: 1, INR: 83.5, EUR: 0.92, GBP: 0.79 };
+const RATE_URL = "https://open.er-api.com/v6/latest/USD";
+const RATE_REFRESH_MS = 10 * 60 * 1000;
+
+/* ----- Prices list -----
+   cgId: if set, the price is fetched live from CoinGecko (free, no key).
+   Stocks have no cgId, so they move as SIMULATED prices.
+   Starting prices and "vol" are sample values, not real quotes. */
+/* logo: put an image link or file name here (e.g. "logos/tesla.png").
+   Leave it "" to show the colored ticker icon instead. */
+const ASSETS = [
+  { icon: "₿", color: "#f7931a", logo: "", name: "Bitcoin",   symbol: "BTC",   price: 68500,  vol: 0.010,  cgId: "bitcoin" },
+  { icon: "Ξ", color: "#627eea", logo: "", name: "Ethereum",  symbol: "ETH",   price: 3500,   vol: 0.012,  cgId: "ethereum" },
+  { icon: "₮", color: "#26a17b", logo: "", name: "Tether",    symbol: "USDT",  price: 1.00,   vol: 0.0005, cgId: "tether" },
+  { icon: "◎", color: "#14f195", logo: "", name: "Solana",    symbol: "SOL",   price: 150,    vol: 0.015,  cgId: "solana" },
+  { icon: "X", color: "#23292f", logo: "", name: "XRP",       symbol: "XRP",   price: 0.55,   vol: 0.012,  cgId: "ripple" },
+  { icon: "T", color: "#e31937", logo: "", name: "Tesla",     symbol: "TSLA",  price: 245.30, vol: 0.015 },
+  { icon: "A", color: "#555555", logo: "", name: "Apple",     symbol: "AAPL",  price: 230,    vol: 0.010 },
+  { icon: "N", color: "#76b900", logo: "", name: "NVIDIA",    symbol: "NVDA",  price: 180,    vol: 0.020 },
+  { icon: "M", color: "#00a4ef", logo: "", name: "Microsoft", symbol: "MSFT",  price: 420,    vol: 0.010 },
+  { icon: "A", color: "#ff9900", logo: "", name: "Amazon",    symbol: "AMZN",  price: 210,    vol: 0.012 },
+  { icon: "G", color: "#4285f4", logo: "", name: "Alphabet",  symbol: "GOOGL", price: 175,    vol: 0.011 },
+  { icon: "F", color: "#0866ff", logo: "", name: "Meta",      symbol: "META",  price: 610,    vol: 0.013 },
+  { icon: "S", color: "#1428a0", logo: "", name: "Samsung",   symbol: "SSNLF", price: 58.40,  vol: 0.012 }
+];
+const ASSET_TICK_MS = 2500;
+const CRYPTO_REFRESH_MS = 60 * 1000;
+
+/* ----- Chart: Tesla (SIMULATED scenario) -----
+   Each tick = 1 simulated minute.
+   Rises from START to PEAK over RISE_MINUTES, then falls over FALL_MINUTES. */
+const CHART = {
+  name: "Tesla",
+  symbol: "TSLA",
+  start: 245.30,
+  peak: 1500,          // peak price the chart reaches (set to 2000 if you prefer)
+  riseMinutes: 30,     // how long it rises
+  fallMinutes: 30,     // how long it falls after the peak
+  tickMs: 1600,
+  maxPoints: 70
+};
+
+/* ----- Investment pop-up -----
+   Add one entry per investor: name, country, and amount in USD.
+   Amount can be a number (e.g. 500) or "..." until you fill it in.
+   The pop-up says: "<name> from <country> just invested <amount>" */
+const INVESTMENT_ALERTS = [
+  { name: "...", country: "...", amount: "..." }
+];
+const ALERT_SHOW_MS = 4000;       // how long the pop-up stays on screen
+const ALERT_MIN_GAP_MS = 12000;   // shortest wait between pop-ups
+const ALERT_MAX_GAP_MS = 25000;   // longest wait between pop-ups
+
+const W = 400, H = 260, PAD = 18;
+const UP_COLOR = "#00b074";
+const DOWN_COLOR = "#e5484d";
+</script>
+
+<div class="app">
+
+  <!-- ============ TAB 1: MARKET (chart) ============ -->
+  <section id="tab-market" class="screen active">
+    <div class="title-row"><div class="page-title">Market</div></div>
+    <div class="cur-wrap" data-cur-bar></div>
+
+    <div class="market-card">
+      <div class="market-top">
+        <div>
+          <div class="market-label"><span id="chart-title">Tesla · TSLA</span><span class="badge sim">SIMULATED</span></div>
+          <div class="market-price" id="price">—</div>
+          <div class="market-change" id="change">—</div>
+        </div>
+        <div class="live-pill"><span class="dot"></span>LIVE</div>
+      </div>
+
+      <div class="chart-box" id="chart-box">
+        <svg id="chart" viewBox="0 0 400 260" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+              <stop id="fade-top" offset="0%" stop-color="#00b074" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g id="grid" stroke="#eef1f5" stroke-width="1"></g>
+          <path id="area" fill="url(#fade)"/>
+          <path id="line" fill="none" stroke="#00b074" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="float-dot" id="dot"></div>
+        <div class="float-tag" id="tag">—</div>
+      </div>
+      <div class="chart-axis"><span>Start</span><span>Now</span></div>
+    </div>
+    <div class="chart-note">Simulated chart for demonstration. Not real market data.</div>
+
+    <button class="cta" onclick="goTab('account')">Input unique code to check your investments</button>
+  </section>
+
+  <!-- ============ TAB 2: PRICES ============ -->
+  <section id="tab-prices" class="screen">
+    <div class="title-row"><div class="page-title">Live Prices</div></div>
+    <div class="cur-wrap" data-cur-bar></div>
+    <div class="asset-list" id="asset-list"></div>
+    <div class="footer-note" id="prices-note">Crypto prices are live. Stock prices are simulated.</div>
+  </section>
+
+  <!-- ============ TAB 3: ACCOUNT (login) ============ -->
+  <section id="tab-account" class="screen center">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h2>Trading Portal</h2>
+      <p>Enter your unique code to check your investments</p>
+      <label for="code">Unique Code</label>
+      <input type="text" id="code" placeholder="XXXXXX" maxlength="10" autocomplete="off" autocapitalize="characters">
+      <button class="cta" onclick="login()">Check Balance</button>
+      <div id="error-msg">Incorrect code. Please try again.</div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="tab-dashboard" class="screen">
+    <div class="title-row"><div class="page-title">Trading Balance Summary</div></div>
+    <div class="cur-wrap" data-cur-bar></div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="balance-box">
+          <div class="label-caps">Total Balance</div>
+          <div class="big-value" id="trading-balance">—</div>
+        </div>
+        <div class="info-row"><span>Available Cash ⓘ</span><span class="val" id="available-cash">—</span></div>
+        <div class="info-row"><span>Margin from Pledged Holdings ⓘ</span><span class="val" id="margin">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Amount Utilised Today</div>
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 200 110">
+            <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="#e4e8ed" stroke-width="22"/>
+            <path id="gauge-fill" d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="#00b074" stroke-width="22" style="transition: stroke-dashoffset .8s ease"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="small">Amount Utilised</div>
+            <div class="num" id="gauge-value">—</div>
+          </div>
+        </div>
+        <div class="gauge-scale"><span id="gauge-min">—</span><span id="gauge-max">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Trading Balance Breakup</div>
+        <div class="breakup-row"><span>Amount Added (A) ▾</span><span class="amt green" id="amount-added">—</span></div>
+        <div class="breakup-row"><span>Amount Utilised (B)</span><span class="amt red" id="amount-utilised">—</span></div>
+        <div class="breakup-row"><span>Trading Balance (A-B)</span><span class="amt" id="breakup-balance">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Today's Summary</div>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Today's Top Up</div><div class="value" id="today-topup">—</div></div>
+          <div class="stat"><div class="label">Investment Balance</div><div class="value" id="investment">—</div></div>
+          <div class="stat"><div class="label">Gain</div><div class="value green" id="gain">—</div></div>
+          <div class="stat"><div class="label">Loss</div><div class="value red" id="loss">—</div></div>
+        </div>
+      </div>
+
+      <div class="footer-note">Figures are updated manually.</div>
+      <button class="cta" style="margin-top:0;background:#fff;color:var(--red);border:1px solid var(--line);box-shadow:none" onclick="logout()">Log out</button>
+    </div>
+  </section>
+
+  <!-- ============ TAB 4: ABOUT ============ -->
+  <section id="tab-about" class="screen">
+    <div class="title-row"><div class="page-title">About</div></div>
+    <div class="card about-card">
+      <div class="logo">📈</div>
+      <h3>Trading Portal</h3>
+      <p>View your trading balance, today's activity, and your investment summary in one place.</p>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="list-item"><span class="ic">🔒</span><div>Private access<small>Sign in with your unique code</small></div></div>
+      <div class="list-item"><span class="ic">💱</span><div>Currency<small>Switch between USD, INR, EUR and GBP</small></div></div>
+      <div class="list-item"><span class="ic">🕘</span><div>Market hours<small>Prices and chart update during the session</small></div></div>
+      <div class="list-item"><span class="ic">✍️</span><div>Manual updates<small>Balances are updated by the admin</small></div></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ BOTTOM MENU (4 tabs) ============ -->
+<nav class="tabbar">
+  <button class="tab active" data-tab="market" onclick="goTab('market')"><span class="ti">📊</span>Market</button>
+  <button class="tab" data-tab="prices" onclick="goTab('prices')"><span class="ti">💲</span>Prices</button>
+  <button class="tab" data-tab="account" onclick="goTab('account')"><span class="ti">👤</span>Account</button>
+  <button class="tab" data-tab="about" onclick="goTab('about')"><span class="ti">ℹ️</span>About</button>
+</nav>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ---------- Currency and rates ---------- */
+let currency = "USD";
+let rates = { ...FALLBACK_RATES };
+let ratesLive = false;
+
+function curInfo(code) { return CURRENCIES.find(c => c.code === code); }
+
+function money(usd) {
+  const c = curInfo(currency);
+  const value = Number(usd || 0) * rates[currency];
+  return new Intl.NumberFormat(c.locale, { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+}
+
+function moneyShort(usd) {
+  const v = Number(usd || 0) * rates[currency];
+  const c = curInfo(currency);
+  const sym = new Intl.NumberFormat(c.locale, { style: "currency", currency, maximumFractionDigits: 0 })
+    .formatToParts(0).find(p => p.type === "currency").value;
+  return v >= 1000 ? sym + (v / 1000).toFixed(2) + "K" : sym + v.toFixed(1);
+}
+
+function buildCurrencyBars() {
+  document.querySelectorAll("[data-cur-bar]").forEach(wrap => {
+    wrap.innerHTML = "";
+    const bar = document.createElement("div");
+    bar.className = "cur-bar";
+    CURRENCIES.forEach(c => {
+      const b = document.createElement("button");
+      b.className = "cur-btn" + (c.code === currency ? " active" : "");
+      b.textContent = c.code;
+      b.onclick = () => setCurrency(c.code);
+      bar.appendChild(b);
+    });
+    wrap.appendChild(bar);
+    const note = document.createElement("div");
+    note.className = "rate-note";
+    note.dataset.rateNote = "1";
+    wrap.appendChild(note);
+  });
+  updateRateNotes();
+}
+
+function updateRateNotes() {
+  const dot = ratesLive ? `<span class="live-dot"></span>` : `<span class="live-dot off-dot"></span>`;
+  const label = ratesLive ? "Live rates" : "Approximate rates";
+  const text = currency === "USD"
+    ? `${dot}${label} · amounts in USD`
+    : `${dot}${label} · 1 USD = ${rates[currency].toFixed(2)} ${currency}`;
+  document.querySelectorAll("[data-rate-note]").forEach(n => n.innerHTML = text);
+}
+
+function setCurrency(code) {
+  currency = code;
+  document.querySelectorAll(".cur-btn").forEach(b => b.classList.toggle("active", b.textContent === code));
+  updateRateNotes();
+  if (loggedInUser) fillDashboard(USERS[loggedInUser]);
+  render();
+  renderPrices();
+}
+
+async function loadRates() {
+  try {
+    const res = await fetch(RATE_URL);
+    const data = await res.json();
+    if (data && data.rates) {
+      CURRENCIES.forEach(c => { if (data.rates[c.code]) rates[c.code] = data.rates[c.code]; });
+      ratesLive = true;
+    }
+  } catch (e) { ratesLive = false; }
+  updateRateNotes();
+  if (loggedInUser) fillDashboard(USERS[loggedInUser]);
+  render();
+  renderPrices();
+}
+
+/* ---------- Tabs ---------- */
+let loggedInUser = null;
+
+function goTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  if (name === "account") {
+    if (loggedInUser) showScreen("tab-dashboard");
+    else { showScreen("tab-account"); setTimeout(() => $("code").focus(), 50); }
+    return;
+  }
+  showScreen("tab-" + name);
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const el = $(id);
+  el.classList.add("active");
+  el.style.animation = "none"; el.offsetHeight; el.style.animation = "";
+}
+
+/* ---------- Login ---------- */
+function login() {
+  const code = $("code").value.trim().toUpperCase();
+  if (USERS[code]) {
+    $("error-msg").style.display = "none";
+    loggedInUser = code;
+    fillDashboard(USERS[code]);
+    $("code").value = "";
+    showScreen("tab-dashboard");
+  } else {
+    $("error-msg").style.display = "block";
+  }
+}
+$("code").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+function logout() {
+  loggedInUser = null;
+  $("code").value = "";
+  $("error-msg").style.display = "none";
+  goTab("account");
+}
+
+function fillDashboard(u) {
+  const tradingBalance = u.amountAdded - u.amountUtilised;
+  $("trading-balance").textContent = money(u.amountAdded + u.gain - u.loss);
+  $("available-cash").textContent = money(u.availableCash);
+  $("margin").textContent = money(u.margin);
+
+  const max = u.amountAdded > 0 ? u.amountAdded : 1;
+  const pct = Math.min(Math.max(u.amountUtilised / max, 0), 1);
+  const ARC = Math.PI * 90;
+  const fill = $("gauge-fill");
+  fill.style.strokeDasharray = ARC;
+  fill.style.strokeDashoffset = ARC * (1 - pct);
+  $("gauge-value").textContent = money(u.amountUtilised);
+  $("gauge-min").textContent = money(0);
+  $("gauge-max").textContent = moneyShort(u.amountAdded);
+
+  $("amount-added").textContent = money(u.amountAdded);
+  $("amount-utilised").textContent = money(u.amountUtilised);
+  $("breakup-balance").textContent = money(tradingBalance);
+
+  $("today-topup").textContent = money(u.todayTopUp);
+  $("investment").textContent = money(u.investmentBalance);
+  $("gain").textContent = money(u.gain);
+  $("loss").textContent = money(u.loss);
+}
+
+/* ---------- Chart (Tesla, simulated rise and fall) ---------- */
+let chartMinute = 0;
+let series = [CHART.start];
+
+function nextChartValue() {
+  chartMinute++;
+  const m = chartMinute, R = CHART.riseMinutes, F = CHART.fallMinutes;
+  const last = series[series.length - 1];
+  let base;
+  if (m <= R) {
+    // Rise from start to peak
+    base = CHART.start * Math.pow(CHART.peak / CHART.start, m / R);
+  } else if (m <= R + F) {
+    // Fall back toward roughly 90% of start
+    const target = CHART.start * 0.9;
+    base = CHART.peak * Math.pow(target / CHART.peak, (m - R) / F);
+  } else {
+    // After the scenario, drift sideways
+    return Math.max(1, last * (1 + (Math.random() - 0.5) * 0.01));
+  }
+  // Small natural wiggle so the line is not perfectly smooth
+  return Math.max(1, base * (1 + (Math.random() - 0.5) * 0.012));
+}
+
+function tick() {
+  series.push(nextChartValue());
+  if (series.length > CHART.maxPoints) series.shift();
+  render();
+}
+
+function render() {
+  const n = series.length;
+  const min = Math.min(...series), max = Math.max(...series);
+  const range = (max - min) || 1;
+
+  const xy = series.map((v, i) => [
+    (i / Math.max(n - 1, 1)) * W,
+    PAD + (H - PAD * 2) * (1 - (v - min) / range)
+  ]);
+
+  let d = `M ${xy[0][0].toFixed(1)} ${xy[0][1].toFixed(1)}`;
+  for (let i = 1; i < n - 1; i++) {
+    const mx = (xy[i][0] + xy[i + 1][0]) / 2;
+    const my = (xy[i][1] + xy[i + 1][1]) / 2;
+    d += ` Q ${xy[i][0].toFixed(1)} ${xy[i][1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+  }
+  const last = xy[n - 1];
+  if (n > 1) d += ` L ${last[0].toFixed(1)} ${last[1].toFixed(1)}`;
+
+  // One rule for the whole screen: up or down compared to the chart start
+  const up = series[n - 1] >= series[0];
+  const color = up ? UP_COLOR : DOWN_COLOR;
+
+  $("line").setAttribute("d", d);
+  $("line").setAttribute("stroke", color);
+  $("area").setAttribute("d", d + ` L ${W} ${H} L 0 ${H} Z`);
+  $("fade-top").setAttribute("stop-color", color);
+
+  const boxW = $("chart-box").clientWidth, boxH = $("chart-box").clientHeight;
+  const px = (last[0] / W) * boxW, py = (last[1] / H) * boxH;
+  const dot = $("dot"), tag = $("tag");
+  dot.style.left = px + "px";
+  dot.style.top = py + "px";
+  dot.style.setProperty("--c", color);
+  dot.style.setProperty("--c-soft", up ? "rgba(0,176,116,.15)" : "rgba(229,72,77,.15)");
+  tag.style.left = Math.min(Math.max(px, 50), boxW - 50) + "px";
+  tag.style.top = py + "px";
+  tag.style.setProperty("--c", color);
+  tag.textContent = money(series[n - 1]) + (up ? " ▲" : " ▼");
+
+  const price = series[n - 1], start = series[0];
+  const diff = price - start, pct = (diff / start) * 100;
+  $("price").textContent = money(price);
+  $("price").style.color = color;
+  $("change").textContent = (diff >= 0 ? "▲ +" : "▼ ") + money(Math.abs(diff)) + " (" + (diff >= 0 ? "+" : "") + pct.toFixed(2) + "%)";
+  $("change").style.color = color;
+
+  $("grid").innerHTML = [0.25, 0.5, 0.75].map(f => `<line x1="0" x2="${W}" y1="${H * f}" y2="${H * f}"/>`).join("");
+}
+
+/* ---------- Prices list ---------- */
+const ASSET_LIST = ASSETS.map(a => ({ ...a, open: a.price, dir: 0, live: false, hasOpen: false }));
+
+function moveAssets() {
+  ASSET_LIST.forEach(a => {
+    if (a.live) return; // live crypto prices come from CoinGecko, not from this simulation
+    const prev = a.price;
+    a.price = Math.max(0.0001, a.price * (1 + (Math.random() - 0.5) * a.vol * 2));
+    a.dir = a.price >= prev ? 1 : -1;
+  });
+  renderPrices();
+}
+
+async function loadCrypto() {
+  const ids = ASSET_LIST.filter(a => a.cgId).map(a => a.cgId).join(",");
+  try {
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+    const data = await res.json();
+    ASSET_LIST.forEach(a => {
+      if (a.cgId && data[a.cgId] && data[a.cgId].usd) {
+        const prev = a.price;
+        a.price = data[a.cgId].usd;
+        a.dir = a.price >= prev ? 1 : -1;
+        if (!a.hasOpen) { a.open = a.price; a.hasOpen = true; }
+        a.live = true;
+      }
+    });
+  } catch (e) {
+    // If CoinGecko cannot be reached, crypto rows keep simulated values
+    ASSET_LIST.forEach(a => { if (a.cgId) a.live = false; });
+  }
+  renderPrices();
+}
+
+function renderPrices() {
+  const list = $("asset-list");
+  if (!list) return;
+  list.innerHTML = ASSET_LIST.map(a => {
+    const pct = (a.price - a.open) / a.open * 100;
+    const up = a.price >= a.open;
+    const flash = a.dir > 0 ? "flash-up" : a.dir < 0 ? "flash-down" : "";
+    const badge = a.live ? `<span class="badge live">LIVE</span>` : `<span class="badge sim">SIM</span>`;
+    return `<div class="asset-row ${flash}">
+      ${a.logo
+        ? `<img class="asset-logo" src="${a.logo}" alt="${a.symbol}">`
+        : `<div class="asset-ic" style="background:${a.color};color:#fff">${a.icon}</div>`}
+      <div class="asset-name"><b>${a.name}${badge}</b><small>${a.symbol}</small></div>
+      <div class="asset-price">
+        <div class="p">${money(a.price)}</div>
+        <div class="c" style="color:${up ? UP_COLOR : DOWN_COLOR}">${up ? "▲ +" : "▼ "}${Math.abs(pct).toFixed(2)}%</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- Investment pop-up ---------- */
+let alertIndex = 0;
+let toastTimer = null;
+
+function showInvestmentAlert() {
+  if (INVESTMENT_ALERTS.length) {
+    const item = INVESTMENT_ALERTS[alertIndex % INVESTMENT_ALERTS.length];
+    alertIndex++;
+    const t = $("toast");
+    const amount = typeof item.amount === "number" ? money(item.amount) : item.amount;
+    t.innerHTML = `<span class="t-dot"></span><span>${item.name} from ${item.country} just invested ${amount}</span>`;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), ALERT_SHOW_MS);
+  }
+  const wait = ALERT_MIN_GAP_MS + Math.random() * (ALERT_MAX_GAP_MS - ALERT_MIN_GAP_MS);
+  setTimeout(showInvestmentAlert, wait);
+}
+
+/* ---------- Start everything ---------- */
+$("chart-title").textContent = `${CHART.name} · ${CHART.symbol}`;
+buildCurrencyBars();
+render();
+loadRates();
+loadCrypto();
+renderPrices();
+setInterval(tick, CHART.tickMs);
+setInterval(moveAssets, ASSET_TICK_MS);
+setInterval(loadRates, RATE_REFRESH_MS);
+setInterval(loadCrypto, CRYPTO_REFRESH_MS);
+setTimeout(showInvestmentAlert, 5000);
+window.addEventListener("resize", render);
+
+/* ---------- Block copy, long-press menu, drag ---------- */
+document.addEventListener("contextmenu", e => { if (e.target.tagName !== "INPUT") e.preventDefault(); });
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("cut", e => e.preventDefault());
+document.addEventListener("dragstart", e => e.preventDefault());
+document.addEventListener("selectstart", e => { if (e.target.tagName !== "INPUT") e.preventDefault(); });
+document.addEventListener("gesturestart", e => e.preventDefault());
+let lastTouch = 0;
+document.addEventListener("touchend", e => {
+  const now = Date.now();
+  if (now - lastTouch < 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+</script>
+
+</body>
+</html>
