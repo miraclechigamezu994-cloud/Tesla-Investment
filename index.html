@@ -236,11 +236,11 @@ const ASSETS = [
   { icon: "X", color: "#23292f", logo: "", name: "XRP",       symbol: "XRP",   price: 0.55,   vol: 0.012,  cgId: "ripple" },
   { icon: "T", color: "#e31937", logo: "tesla.png", name: "Tesla",     symbol: "TSLA",  price: 245.30, vol: 0.015 },
   { icon: "A", color: "#555555", logo: "apple.png", name: "Apple",     symbol: "AAPL",  price: 230,    vol: 0.010 },
-  { icon: "N", color: "#76b900", logo: "", name: "NVIDIA",    symbol: "NVDA",  price: 180,    vol: 0.020 },
-  { icon: "M", color: "#00a4ef", logo: "", name: "Microsoft", symbol: "MSFT",  price: 420,    vol: 0.010 },
-  { icon: "A", color: "#ff9900", logo: "", name: "Amazon",    symbol: "AMZN",  price: 210,    vol: 0.012 },
-  { icon: "G", color: "#4285f4", logo: "", name: "Alphabet",  symbol: "GOOGL", price: 175,    vol: 0.011 },
-  { icon: "F", color: "#0866ff", logo: "", name: "Meta",      symbol: "META",  price: 610,    vol: 0.013 },
+  { icon: "N", color: "#76b900", logo: "nvidia.pnh", name: "NVIDIA",    symbol: "NVDA",  price: 180,    vol: 0.020 },
+  { icon: "M", color: "#00a4ef", logo: "microsoft.png", name: "Microsoft", symbol: "MSFT",  price: 420,    vol: 0.010 },
+  { icon: "A", color: "#ff9900", logo: "amazon.png", name: "Amazon",    symbol: "AMZN",  price: 210,    vol: 0.012 },
+  { icon: "G", color: "#4285f4", logo: "alphabet.png", name: "Alphabet",  symbol: "GOOGL", price: 175,    vol: 0.011 },
+  { icon: "F", color: "#0866ff", logo: "meta.png", name: "Meta",      symbol: "META",  price: 610,    vol: 0.013 },
   { icon: "S", color: "#1428a0", logo: "samsung.png", name: "Samsung",   symbol: "SSNLF", price: 58.40,  vol: 0.012 }
 ];
 const ASSET_TICK_MS = 2500;
@@ -250,6 +250,7 @@ const CRYPTO_REFRESH_MS = 60 * 1000;
    Each tick = 1 invest minute.
    Rises from START to PEAK over RISE_MINUTES, then falls over FALL_MINUTES. */
 const CHART = {
+  logo: "tesla.png",
   name: "Tesla",
   symbol: "TSLA",
   start: 245.30,
