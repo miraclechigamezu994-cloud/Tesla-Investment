@@ -1,0 +1,35 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="600" height="300"
+     viewBox="0 0 600 300">
+
+  <title>Amazon Logo</title>
+
+  <!-- Amazon wordmark -->
+  <text x="300" y="165"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="115"
+        font-weight="bold"
+        letter-spacing="-7"
+        text-anchor="middle"
+        fill="#232F3E">amazon</text>
+
+  <!-- Orange smile and arrow -->
+  <path d="M145 190
+           C235 255 365 265 460 205"
+        fill="none"
+        stroke="#FF9900"
+        stroke-width="13"
+        stroke-linecap="round"/>
+
+  <!-- Arrowhead -->
+  <path d="M435 198
+           L465 202
+           L450 227"
+        fill="none"
+        stroke="#FF9900"
+        stroke-width="13"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+</svg>
