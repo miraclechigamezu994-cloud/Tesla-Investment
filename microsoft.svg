@@ -1,0 +1,29 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="600" height="150"
+     viewBox="0 0 600 150">
+
+  <title>Microsoft Logo</title>
+
+  <!-- Microsoft four-color symbol -->
+  <g transform="translate(20,25)">
+    <rect x="0" y="0" width="45" height="45"
+          fill="#F25022"/>
+    <rect x="50" y="0" width="45" height="45"
+          fill="#7FBA00"/>
+    <rect x="0" y="50" width="45" height="45"
+          fill="#00A4EF"/>
+    <rect x="50" y="50" width="45" height="45"
+          fill="#FFB900"/>
+  </g>
+
+  <!-- Microsoft wordmark -->
+  <text x="140" y="100"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="65"
+        font-weight="400"
+        fill="#737373">
+    Microsoft
+  </text>
+
+</svg>
