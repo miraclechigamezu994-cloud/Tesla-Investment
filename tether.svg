@@ -1,0 +1,38 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512"
+     viewBox="0 0 512 512">
+
+  <title>Tether Logo</title>
+
+  <defs>
+    <linearGradient id="tetherGreen"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%" stop-color="#50C5A0"/>
+      <stop offset="100%" stop-color="#26A17B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Tether circular symbol -->
+  <circle cx="256" cy="256" r="230"
+          fill="url(#tetherGreen)"/>
+
+  <!-- Tether T symbol -->
+  <path fill="#FFFFFF"
+        d="M126 145
+           H386
+           V205
+           H286
+           V365
+           H226
+           V205
+           H126
+           Z"/>
+
+  <!-- Horizontal bar -->
+  <rect x="126" y="205"
+        width="260" height="50"
+        rx="4" fill="#FFFFFF"/>
+
+</svg>
