@@ -1,0 +1,64 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512"
+     viewBox="0 0 512 512">
+
+  <defs>
+    <linearGradient id="btcOrange"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#F7931A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Round orange background -->
+  <circle cx="256" cy="256" r="248"
+          fill="url(#btcOrange)"/>
+
+  <!-- Bitcoin symbol -->
+  <path fill="#FFFFFF"
+        d="M343 218
+           C343 179 317 156 275 149
+           L275 102
+           L246 102
+           L246 147
+           L221 147
+           L221 102
+           L192 102
+           L192 147
+           L157 147
+           L157 177
+           L183 177
+           L183 335
+           L157 335
+           L157 365
+           L192 365
+           L192 410
+           L221 410
+           L221 365
+           L246 365
+           L246 410
+           L275 410
+           L275 364
+           C327 358 355 331 355 286
+           C355 256 340 235 315 224
+           C334 216 343 202 343 218
+           Z
+
+           M223 180
+           L263 180
+           C294 180 309 192 309 215
+           C309 239 293 251 262 251
+           L223 251
+           Z
+
+           M223 280
+           L269 280
+           C304 280 321 293 321 318
+           C321 343 303 353 268 353
+           L223 353
+           Z"
+        transform="translate(0 0)"/>
+
+</svg>
