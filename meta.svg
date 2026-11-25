@@ -1,0 +1,43 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="300"
+     viewBox="0 0 512 300">
+
+  <title>Meta Logo</title>
+
+  <defs>
+    <linearGradient id="metaGradient"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%" stop-color="#0866FF"/>
+      <stop offset="100%" stop-color="#00A5FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Meta infinity symbol -->
+  <path d="M75 190
+           C105 100 150 65 195 65
+           C255 65 290 155 330 205
+           C365 250 410 240 435 195
+           C460 150 440 95 400 95
+           C350 95 315 160 280 210
+           C245 260 205 265 170 235
+           C135 205 120 150 95 150
+           C75 150 65 170 75 190Z"
+        fill="none"
+        stroke="url(#metaGradient)"
+        stroke-width="30"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Meta wordmark -->
+  <text x="256" y="285"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="62"
+        font-weight="bold"
+        text-anchor="middle"
+        fill="#0866FF">
+    Meta
+  </text>
+
+</svg>
